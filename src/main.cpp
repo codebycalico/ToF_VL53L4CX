@@ -53,7 +53,7 @@
 
 #define DEV_I2C Wire
 
-#define LedPin 13
+#define LEDPIN 13
 
 // Components.
 VL53L4CX sensor_vl53l4cx_sat(&DEV_I2C, A1);
@@ -63,7 +63,7 @@ VL53L4CX sensor_vl53l4cx_sat(&DEV_I2C, A1);
 void setup()
 {
   // Led.
-  pinMode(LedPin, OUTPUT);
+  pinMode(LEDPIN, OUTPUT);
 
   // Initialize serial for output.
   Serial.begin(115200);
@@ -102,9 +102,6 @@ void loop()
     status = sensor_vl53l4cx_sat.VL53L4CX_GetMeasurementDataReady(&NewDataReady);
   } while (!NewDataReady);
 
-  //Led on
-  digitalWrite(LedPin, HIGH);
-
   if ((!status) && (NewDataReady != 0)) {
     status = sensor_vl53l4cx_sat.VL53L4CX_GetMultiRangingData(pMultiRangingData);
     no_of_object_found = pMultiRangingData->NumberOfObjectsFound;
@@ -124,12 +121,15 @@ void loop()
       Serial.print(" Mcps, Ambient=");
       Serial.print((float)pMultiRangingData->RangeData[j].AmbientRateRtnMegaCps / 65536.0);
       Serial.print(" Mcps");
+      if(pMultiRangingData->RangeData[j].RangeMilliMeter < 200){
+        digitalWrite(LEDPIN, HIGH);
+      } else {
+        digitalWrite(LEDPIN, LOW);
+      }
     }
     Serial.println("");
     if (status == 0) {
       status = sensor_vl53l4cx_sat.VL53L4CX_ClearInterruptAndStartMeasurement();
     }
   }
-
-  digitalWrite(LedPin, LOW);
 }
